@@ -19,7 +19,7 @@ bl_info = {
 
 # from https://docs.blender.org/manual/en/latest/advanced/scripting/addon_tutorial.html
 class NODE_OT_add_labelled_reroute_nodes(bpy.types.Operator):
-    """Add labelled reroute nodes to all the selected nodes' outputs"""      # Use this as a tooltip for menu items and buttons.
+    """Add labelled reroute nodes to the selected nodes'"""      # Use this as a tooltip for menu items and buttons.
     bl_idname = "node.add_labelled_reroute_nodes"   # Unique identifier for buttons and menu items to reference.
     bl_label = "Add Labelled Reroute Nodes"         # Display name in the interface.
     bl_options = {'REGISTER', 'UNDO'}  # Enable undo for the operator.
@@ -56,7 +56,7 @@ class NODE_OT_add_labelled_reroute_nodes(bpy.types.Operator):
                             inputLink = l
                             break # "highlander rules"...
                     
-                    if inputLink == None:
+                    if (nodePort.enabled == False) or (inputLink == None):
                         inputCounter += 1 # increment the counter so stuff lines up properly
                         continue # don't bother with this one, nothing to connect it to
 
@@ -94,6 +94,12 @@ class NODE_OT_add_labelled_reroute_nodes(bpy.types.Operator):
                 
                 nodePorts = node.outputs[:]
                 for nodePort in nodePorts:
+
+                    # skip hidden ports
+                    if nodePort.enabled == False:
+                        outputCounter += 1
+                        continue
+
                     newRerouteNode = tree.nodes.new("NodeReroute")  # add new reroute node
 
                     # label it
@@ -138,8 +144,6 @@ def draw_menu(self, context):
     newOperator.labelInputs = False
     newOperator.labelOutputs = True
     
-
-
 
 def register():
     print("Activating addon")

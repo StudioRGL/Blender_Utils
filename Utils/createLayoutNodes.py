@@ -111,9 +111,12 @@ def draw_menu(self, context):
     layout = self.layout
     layout.separator()
     
-    newOperator = layout.operator("node.add_labelled_reroute_nodes", icon='RIGHTARROW', text="Add Labelled Reroute Nodes")  # https://docs.blender.org/api/current/bpy.types.UILayout.html
+    newOperator = layout.operator("node.add_labelled_reroute_nodes", icon='TRIA_LEFT', text="Add Labelled Inputs")  # https://docs.blender.org/api/current/bpy.types.UILayout.html
     newOperator.labelInputs = True
     newOperator.labelOutputs = False
+    newOperator = layout.operator("node.add_labelled_reroute_nodes", icon='TRIA_RIGHT', text="Add Labelled Outputs")  # https://docs.blender.org/api/current/bpy.types.UILayout.html
+    newOperator.labelInputs = False
+    newOperator.labelOutputs = True
     
 
 

@@ -19,7 +19,7 @@ bl_info = {
 
 # from https://docs.blender.org/manual/en/latest/advanced/scripting/addon_tutorial.html
 class NODE_OT_add_labelled_reroute_nodes(bpy.types.Operator):
-    """Add labelled reroute nodes to the selected nodes'"""      # Use this as a tooltip for menu items and buttons.
+    """Add labelled reroute nodes to the selected nodes"""      # Use this as a tooltip for menu items and buttons.
     bl_idname = "node.add_labelled_reroute_nodes"   # Unique identifier for buttons and menu items to reference.
     bl_label = "Add Labelled Reroute Nodes"         # Display name in the interface.
     bl_options = {'REGISTER', 'UNDO'}  # Enable undo for the operator.

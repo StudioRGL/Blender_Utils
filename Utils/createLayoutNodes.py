@@ -41,61 +41,56 @@ class NODE_OT_add_labelled_reroute_nodes(bpy.types.Operator):
             inputCounter = 0
             outputCounter = 0
 
-
-            
-            nodePorts = []
+            # Do the input nodes
             if self.labelInputs:
-                nodePorts += node.inputs[:]
-            if self.labelOutputs:
-                nodePorts += node.outputs[:]
-            
-            for nodePort in nodePorts:
-                newRerouteNode = tree.nodes.new("NodeReroute")  # add new reroute node
+                nodePorts = node.inputs[:]
+                for nodePort in nodePorts:
+                    newRerouteNode = tree.nodes.new("NodeReroute")  # add new reroute node
 
-                # check if the node's an input node, we'll use this throughout
-                if nodePort in node.inputs[:]:
-                    nodeIsInput = True
-                else:
-                    nodeIsInput = False  # there's probably a cooler way of doing this but hey
-                
-                # label it
-                if nodeIsInput:
+                    # label it
                     label = 'input'
-                else:
-                    # it's an output
+                    newRerouteNode.label = label
+
+                    # figure out position
+                    x = node.location.x
+                    y = node.location.y
+
+                    x -= GRID_SPACING * 4
+                    y -= inputCounter * GRID_SPACING
+                    inputCounter += 1
+                    
+                    snappedX = self.snapToGrid(x, GRID_SPACING)  # snap
+                    snappedY = self.snapToGrid(y, GRID_SPACING)  # snap
+                    newRerouteNode.location = Vector((snappedX, snappedY))  # position it
+                    
+                    # tree.links.new(nodePort, newRerouteNode.inputs[0])  # link it
+
+            # Do the output nodes
+            if self.labelOutputs:
+                nodePorts = node.outputs[:]
+                for nodePort in nodePorts:
+                    newRerouteNode = tree.nodes.new("NodeReroute")  # add new reroute node
+
+                    # label it
                     if node.type == 'REROUTE':
                         label = node.label
                     else:
                         label = node.label + ' ' + nodePort.name
-                newRerouteNode.label = label
+                    newRerouteNode.label = label
 
-                # figure out position
-                x = node.location.x
-                y = node.location.y
+                    # figure out position
+                    x = node.location.x
+                    y = node.location.y
 
-                if nodeIsInput:
-                    x -= GRID_SPACING * 4
-                    y -= inputCounter * GRID_SPACING
-                    inputCounter += 1
-                else: # it's an output
                     x += node.width +  GRID_SPACING * 4
                     y -= outputCounter * GRID_SPACING
                     outputCounter += 1
-                
-                
-                snappedX = self.snapToGrid(x, GRID_SPACING)  # snap
-                snappedY = self.snapToGrid(y, GRID_SPACING)  # snap
-                newRerouteNode.location = Vector((snappedX, snappedY))  # position it
-                
-                if nodeIsInput:
-                    pass
-                    # find the link that ends in this port [highlander rules!]
-                    # change the end link to conect to the new reroute
-                    # add a new link after the reroute
-                else:
-                    tree.links.new(nodePort, newRerouteNode.inputs[0])  # link it
-                
-        
+                    
+                    snappedX = self.snapToGrid(x, GRID_SPACING)  # snap
+                    snappedY = self.snapToGrid(y, GRID_SPACING)  # snap
+                    newRerouteNode.location = Vector((snappedX, snappedY))  # position it
+                    
+                    tree.links.new(nodePort, newRerouteNode.inputs[0])  # link it"""
     
         return {'FINISHED'}            # Lets Blender know the operator finished successfully.
     

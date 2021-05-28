@@ -9,10 +9,11 @@ from mathutils import Vector
 bl_info = {
     "name": "Add Labelled Reroute Nodes",
     "author": "Studio RGL www.rgl.tv",
-    "description": "A simple addon that adds a right-click option to the node editor menu, 'Add Labelled Reroute Nodes'. This creates labelled reroute nodes for every output of the selected nodes. Keep those graphs clean!",
+    "description": "A simple addon that adds right-click options to the node editor menu. These creates labelled reroute nodes for the in/outs of selected nodes. Keep those graphs clean!",
     "blender": (2, 80, 0),
     "location": "Node Editor > Right Click Menu",
     "category": "Node",
+    "support":"TESTING"
 }
 
 
@@ -62,7 +63,7 @@ class NODE_OT_add_labelled_reroute_nodes(bpy.types.Operator):
                     newRerouteNode = tree.nodes.new("NodeReroute")  # add new reroute node
 
                     # label it
-                    label = inputLink.from_node.label + inputLink.from_socket.name
+                    label = inputLink.from_node.label + ' ' + inputLink.from_socket.name
                     newRerouteNode.label = label
 
                     # figure out position

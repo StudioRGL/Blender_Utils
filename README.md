@@ -14,7 +14,7 @@ https://twitter.com/realgoodliars
 2) Install the .py via Blender Preferences->Add-ons->Install
 ![image](https://user-images.githubusercontent.com/16046786/119989551-37c13600-bfbf-11eb-93a3-6d4a90514834.png)
 
-3) Activate it (make sure the check box is checked
+3) Activate it (make sure the check box is checked)
 4) In any node editor, select one or more nodes, then right click and choose either `Add Labelled Inputs` or `Add Labelled Outputs`
 ![image](https://user-images.githubusercontent.com/16046786/119989325-f29d0400-bfbe-11eb-9670-2dbc7487f643.png)
 5) This will create labelled reroute nodes 

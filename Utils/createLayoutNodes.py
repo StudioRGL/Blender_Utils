@@ -1,4 +1,5 @@
 import bpy
+from math import floor
 from mathutils import Vector
 
 
@@ -22,10 +23,10 @@ class NODE_OT_add_labelled_reroute_nodes(bpy.types.Operator):
     bl_options = {'REGISTER', 'UNDO'}  # Enable undo for the operator.
 
     def snapToGrid(self, value, gridSize):
-        return gridSize * int(value/gridSize)
+        return gridSize * floor(value/gridSize)
 
-    def execute(self, context):        # execute() is called when running the operator.
-        GRID_SPACING = 10
+    def execute(self, context, labelInputs = False, labelOutputs = True):        # execute() is called when running the operator.
+        GRID_SPACING = 20
 
         # get selected nodes
         selectedNodes = context.selected_nodes
@@ -36,10 +37,17 @@ class NODE_OT_add_labelled_reroute_nodes(bpy.types.Operator):
             counter = 0
 
             # snap to grid
-            x = self.snapToGrid(node.location.x, GRID_SPACING)
+            x = self.snapToGrid(node.location.x + node.width, GRID_SPACING)
             y = self.snapToGrid(node.location.y, GRID_SPACING)
             snappedNodeLocation = Vector((x,y))
-             
+            
+            nodePorts = []
+            if labelInputs:
+                nodePorts += node.inputs[:]
+            if labelOutputs:
+                nodePorts += node.outputs[:]
+            
+
             for output in node.outputs:
                 # print(output.name)
                 newRerouteNode = tree.nodes.new("NodeReroute")  # add new reroute node
@@ -51,8 +59,7 @@ class NODE_OT_add_labelled_reroute_nodes(bpy.types.Operator):
                     label = node.label + ' ' + output.name
                 newRerouteNode.label = label
 
-                
-                newRerouteNode.location = snappedNodeLocation + Vector((node.width + GRID_SPACING*8, counter*-GRID_SPACING*4))  # position it
+                newRerouteNode.location = snappedNodeLocation + Vector(( GRID_SPACING*4, counter*-GRID_SPACING*2))  # position it
                 tree.links.new(output, newRerouteNode.inputs[0])  # link it
                 
                 counter += 1 # increment position counter

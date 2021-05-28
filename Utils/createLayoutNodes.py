@@ -21,6 +21,9 @@ class NODE_OT_add_labelled_reroute_nodes(bpy.types.Operator):
     bl_label = "Add Labelled Reroute Nodes"         # Display name in the interface.
     bl_options = {'REGISTER', 'UNDO'}  # Enable undo for the operator.
 
+    def snapToGrid(self, value, gridSize):
+        return gridSize * int(value/gridSize)
+
     def execute(self, context):        # execute() is called when running the operator.
         GRID_SPACING = 10
 
@@ -31,7 +34,11 @@ class NODE_OT_add_labelled_reroute_nodes(bpy.types.Operator):
             node.select = False  # deselect it
             tree = node.id_data
             counter = 0
-            snappedNodeLocation = Vector((node.location[0], node.location[1]))
+
+            # snap to grid
+            x = self.snapToGrid(node.location.x, GRID_SPACING)
+            y = self.snapToGrid(node.location.y, GRID_SPACING)
+            snappedNodeLocation = Vector((x,y))
              
             for output in node.outputs:
                 # print(output.name)

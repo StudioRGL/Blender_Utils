@@ -3,6 +3,10 @@ from math import floor
 from mathutils import Vector
 
 
+# for testing
+# node = bpy.data.materials['Material'].node_tree.nodes['Group']
+
+
 # from https://docs.blender.org/manual/en/latest/advanced/scripting/addon_tutorial.html
 # https://wiki.blender.org/wiki/Process/Addons/Guidelines/metainfo
 bl_info = {
@@ -29,7 +33,6 @@ class NODE_OT_add_labelled_reroute_nodes(bpy.types.Operator):
         return gridSize * floor(value/gridSize)
 
     def execute(self, context):        # execute() is called when running the operator.
-        print ('Executing...')
         GRID_SPACING = 20
 
         # get selected nodes
@@ -38,17 +41,31 @@ class NODE_OT_add_labelled_reroute_nodes(bpy.types.Operator):
         for node in selectedNodes:
             node.select = False  # deselect it
             tree = node.id_data
-            inputCounter = 0
-            outputCounter = 0
 
             # Do the input nodes
             if self.labelInputs:
                 nodePorts = node.inputs[:]
+            
+                inputCounter = 0            
+
                 for nodePort in nodePorts:
+
+                    # check if it's connected to anything - if not we ain't doin nothin
+                    inputLink = None
+                    for l in tree.links:
+                        if l.to_socket == nodePort:
+                            # link found
+                            inputLink = l
+                            break # "highlander rules"...
+                    
+                    if inputLink == None:
+                        inputCounter += 1 # increment the counter so stuff lines up properly
+                        continue # don't bother with this one, nothing to connect it to
+
                     newRerouteNode = tree.nodes.new("NodeReroute")  # add new reroute node
 
                     # label it
-                    label = 'input'
+                    label = inputLink.from_node.label + inputLink.from_socket.name
                     newRerouteNode.label = label
 
                     # figure out position
@@ -63,10 +80,14 @@ class NODE_OT_add_labelled_reroute_nodes(bpy.types.Operator):
                     snappedY = self.snapToGrid(y, GRID_SPACING)  # snap
                     newRerouteNode.location = Vector((snappedX, snappedY))  # position it
                     
-                    # tree.links.new(nodePort, newRerouteNode.inputs[0])  # link it
+                    tree.links.new(inputLink.from_socket, newRerouteNode.inputs[0])  # relink it
+                    tree.links.new(newRerouteNode.outputs[0], inputLink.to_socket)  # relink it
+                    if inputLink in tree.links[:]:
+                        tree.links.remove(inputLink) # think this should be removed automatically so this is gonna be superfluous in most cases
 
             # Do the output nodes
             if self.labelOutputs:
+                outputCounter = 0
                 nodePorts = node.outputs[:]
                 for nodePort in nodePorts:
                     newRerouteNode = tree.nodes.new("NodeReroute")  # add new reroute node

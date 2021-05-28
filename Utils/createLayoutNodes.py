@@ -2,10 +2,7 @@ import bpy
 from math import floor
 from mathutils import Vector
 
-
-# for testing
-# node = bpy.data.materials['Material'].node_tree.nodes['Group']
-
+# A simple utility for Blender's node editor. Adds labelled Reroute nodes.
 
 # from https://docs.blender.org/manual/en/latest/advanced/scripting/addon_tutorial.html
 # https://wiki.blender.org/wiki/Process/Addons/Guidelines/metainfo
@@ -87,7 +84,13 @@ class NODE_OT_add_labelled_reroute_nodes(bpy.types.Operator):
 
             # Do the output nodes
             if self.labelOutputs:
-                outputCounter = 0
+                # hack to make it align properly.
+                # Won't work for fancy GUI nodes like Vector Curves, but should work for reroutes and standard nodes
+                if node.type == 'REROUTE':
+                    outputCounter = 0
+                else:
+                    outputCounter = 3
+                
                 nodePorts = node.outputs[:]
                 for nodePort in nodePorts:
                     newRerouteNode = tree.nodes.new("NodeReroute")  # add new reroute node

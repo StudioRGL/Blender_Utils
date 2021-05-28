@@ -12,24 +12,40 @@ bl_info = {
     "category": "Node",
 }
 
+
+# from https://docs.blender.org/manual/en/latest/advanced/scripting/addon_tutorial.html
+class NODE_OT_add_labelled_reroute_nodes(bpy.types.Operator):
+    """Add labelled reroute nodes to all the selected nodes' outputs"""      # Use this as a tooltip for menu items and buttons.
+    bl_idname = "node.add_labelled_reroute_nodes"   # Unique identifier for buttons and menu items to reference.
+    bl_label = "Add Labelled Reroute Nodes"         # Display name in the interface.
+    bl_options = {'REGISTER', 'UNDO'}  # Enable undo for the operator.
+
+    def execute(self, context):        # execute() is called when running the operator.
+
+        # get selected nodes
+        selectedNodes = context.selected_nodes
+        for node in selectedNodes:
+            pass
+        
+        return {'FINISHED'}            # Lets Blender know the operator finished successfully.
+
+
 # from https://blender.stackexchange.com/questions/150101/python-how-to-add-items-in-context-menu-in-2-8
 def draw_menu(self, context):
+    """Add the operator to the right-click menu"""
     layout = self.layout
     layout.separator()
-    layout.operator("node.duplicate_move", text="Add Labelled Reroute Nodes")
+    # layout.operator("node.duplicate_move", text="Add Labelled Reroute Nodes")
+    layout.operator("node.add_labelled_reroute_nodes", text="Add Labelled Reroute Nodes") 
 
 
 def register():
     print("Activating addon")
-    bpy.types.NODE_MT_context_menu.append(draw_menu)
+    bpy.utils.register_class(NODE_OT_add_labelled_reroute_nodes)  # register the operator
+    bpy.types.NODE_MT_context_menu.append(draw_menu)  # add it to the menu
 
 
 def unregister():
     print("Deactivating addon")
-    bpy.types.NODE_MT_context_menu.remove(draw_menu)
-
-
-# create a labelled layout node for each pin on a node
-def createLabelledReroutes():
-    
-    pass 
+    bpy.utils.unregister_class(NODE_OT_add_labelled_reroute_nodes)  # unregister
+    bpy.types.NODE_MT_context_menu.remove(draw_menu) # remove it from the menu

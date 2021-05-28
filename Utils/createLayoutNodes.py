@@ -22,10 +22,14 @@ class NODE_OT_add_labelled_reroute_nodes(bpy.types.Operator):
     bl_label = "Add Labelled Reroute Nodes"         # Display name in the interface.
     bl_options = {'REGISTER', 'UNDO'}  # Enable undo for the operator.
 
+    labelInputs: bpy.props.BoolProperty(default = True)
+    labelOutputs: bpy.props.BoolProperty(default = True)
+
     def snapToGrid(self, value, gridSize):
         return gridSize * floor(value/gridSize)
 
-    def execute(self, context, labelInputs = False, labelOutputs = True):        # execute() is called when running the operator.
+    def execute(self, context):        # execute() is called when running the operator.
+        print ('Executing...')
         GRID_SPACING = 20
 
         # get selected nodes
@@ -34,47 +38,84 @@ class NODE_OT_add_labelled_reroute_nodes(bpy.types.Operator):
         for node in selectedNodes:
             node.select = False  # deselect it
             tree = node.id_data
-            counter = 0
+            inputCounter = 0
+            outputCounter = 0
 
-            # snap to grid
-            x = self.snapToGrid(node.location.x + node.width, GRID_SPACING)
-            y = self.snapToGrid(node.location.y, GRID_SPACING)
-            snappedNodeLocation = Vector((x,y))
+
             
             nodePorts = []
-            if labelInputs:
+            if self.labelInputs:
                 nodePorts += node.inputs[:]
-            if labelOutputs:
+            if self.labelOutputs:
                 nodePorts += node.outputs[:]
             
-
-            for output in node.outputs:
-                # print(output.name)
+            for nodePort in nodePorts:
                 newRerouteNode = tree.nodes.new("NodeReroute")  # add new reroute node
 
-                # label it
-                if node.type == 'REROUTE':
-                    label = node.label
+                # check if the node's an input node, we'll use this throughout
+                if nodePort in node.inputs[:]:
+                    nodeIsInput = True
                 else:
-                    label = node.label + ' ' + output.name
+                    nodeIsInput = False  # there's probably a cooler way of doing this but hey
+                
+                # label it
+                if nodeIsInput:
+                    label = 'input'
+                else:
+                    # it's an output
+                    if node.type == 'REROUTE':
+                        label = node.label
+                    else:
+                        label = node.label + ' ' + nodePort.name
                 newRerouteNode.label = label
 
-                newRerouteNode.location = snappedNodeLocation + Vector(( GRID_SPACING*4, counter*-GRID_SPACING*2))  # position it
-                tree.links.new(output, newRerouteNode.inputs[0])  # link it
+                # figure out position
+                x = node.location.x
+                y = node.location.y
+
+                if nodeIsInput:
+                    x -= GRID_SPACING * 4
+                    y -= inputCounter * GRID_SPACING
+                    inputCounter += 1
+                else: # it's an output
+                    x += node.width +  GRID_SPACING * 4
+                    y -= outputCounter * GRID_SPACING
+                    outputCounter += 1
                 
-                counter += 1 # increment position counter
-
+                
+                snappedX = self.snapToGrid(x, GRID_SPACING)  # snap
+                snappedY = self.snapToGrid(y, GRID_SPACING)  # snap
+                newRerouteNode.location = Vector((snappedX, snappedY))  # position it
+                
+                if nodeIsInput:
+                    pass
+                    # find the link that ends in this port [highlander rules!]
+                    # change the end link to conect to the new reroute
+                    # add a new link after the reroute
+                else:
+                    tree.links.new(nodePort, newRerouteNode.inputs[0])  # link it
+                
         
+    
         return {'FINISHED'}            # Lets Blender know the operator finished successfully.
-
+    
+    
+    #def invoke(self, context, labelInputs, labelOutputs):
+    #    self.labelInputs = labelInputs
+    #    self.labelOutputs = labelOutputs
+    #    self.execute(context)
 
 # from https://blender.stackexchange.com/questions/150101/python-how-to-add-items-in-context-menu-in-2-8
 def draw_menu(self, context):
     """Add the operator to the right-click menu"""
     layout = self.layout
     layout.separator()
-    # layout.operator("node.duplicate_move", text="Add Labelled Reroute Nodes")
-    layout.operator("node.add_labelled_reroute_nodes", text="Add Labelled Reroute Nodes") 
+    
+    newOperator = layout.operator("node.add_labelled_reroute_nodes", icon='RIGHTARROW', text="Add Labelled Reroute Nodes")  # https://docs.blender.org/api/current/bpy.types.UILayout.html
+    newOperator.labelInputs = True
+    newOperator.labelOutputs = False
+    
+
 
 
 def register():
@@ -87,3 +128,4 @@ def unregister():
     print("Deactivating addon")
     bpy.utils.unregister_class(NODE_OT_add_labelled_reroute_nodes)  # unregister
     bpy.types.NODE_MT_context_menu.remove(draw_menu) # remove it from the menu
+

@@ -10,7 +10,7 @@ https://twitter.com/realgoodliars
 
 ## *Add_labelled_reroute_nodes* Addon
 ### Usage
-1) download createLayoutNodes.py
-2) install it via Blender Preferences->Add-ons->Install
+1) Download createLayoutNodes.py (simplest way is just to download the whole repository, or you can go to the file and choose `Raw`
+2) Install the .py via Blender Preferences->Add-ons->Install
 3) Activate it (make sure the check box is checked
 4) In any node editor, select one or more nodes, then right click and choose either `Add Labelled Inputs` or `Add Labelled Outputs`

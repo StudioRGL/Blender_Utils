@@ -1,4 +1,5 @@
 import bpy
+from mathutils import Vector
 
 
 # from https://docs.blender.org/manual/en/latest/advanced/scripting/addon_tutorial.html
@@ -21,11 +22,34 @@ class NODE_OT_add_labelled_reroute_nodes(bpy.types.Operator):
     bl_options = {'REGISTER', 'UNDO'}  # Enable undo for the operator.
 
     def execute(self, context):        # execute() is called when running the operator.
+        GRID_SPACING = 10
 
         # get selected nodes
         selectedNodes = context.selected_nodes
+        
         for node in selectedNodes:
-            pass
+            node.select = False  # deselect it
+            tree = node.id_data
+            counter = 0
+            snappedNodeLocation = Vector((node.location[0], node.location[1]))
+             
+            for output in node.outputs:
+                # print(output.name)
+                newRerouteNode = tree.nodes.new("NodeReroute")  # add new reroute node
+
+                # label it
+                if node.type == 'REROUTE':
+                    label = node.label
+                else:
+                    label = node.label + ' ' + output.name
+                newRerouteNode.label = label
+
+                
+                newRerouteNode.location = snappedNodeLocation + Vector((node.width + GRID_SPACING*8, counter*-GRID_SPACING*4))  # position it
+                tree.links.new(output, newRerouteNode.inputs[0])  # link it
+                
+                counter += 1 # increment position counter
+
         
         return {'FINISHED'}            # Lets Blender know the operator finished successfully.
 
